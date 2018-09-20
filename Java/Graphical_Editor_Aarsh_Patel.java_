@@ -1,0 +1,220 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.PrintWriter;
+import java.util.Scanner;
+
+public class Graphical_Editor_Aarsh_Patel {
+ public static int [][] screen; //declares main array (global) 
+ public static String []menu; //declares input array (global)
+ static Scanner in = new Scanner(System.in); //for input
+ 
+
+ public static void main(String[] args) {
+  boolean noTerminate = true; //allows the program to loop
+        // do while loop allows menu to continue 
+  do{   
+   String menu1 = in.nextLine(); //gets a string from the user
+   menu = menu1.split(" "); //converts string to array, and separates each letter by space (split) 
+            //if statements develop menu for user to choose from
+   if(menu[0].equals("i")||menu.equals("I")){
+    intialize();  //intializes rows and columns
+   }
+
+   if(menu[0].equals("c")||menu[0].equals("C")){
+    clear();  //assigns all values of screen array to 0
+   }
+
+   if(menu[0].equals("p")||menu[0].equals("P")){
+    pixel(); //assigns one value to one spot in the array (colour)
+   }
+
+   if(menu[0].equals("r")||menu[0].equals("R")){
+    rect(); //assigns multiple values to screen array (rect shape)
+   }
+   
+   if(menu[0].equals("d")||menu[0].equals("D")){
+    display(); //displays the screen array
+   }
+   
+   if (menu[0].equals("m")||menu[0].equals("M")) {
+    smooth(); //determines averages of all values and replaces it with existing values
+   }
+   
+   if (menu[0].equals("l")||menu[0].equals("L")) {
+    readFile(menu[1]); //reads from pre-exsisting text file
+   }
+   
+   if (menu[0].equals("s")||menu[0].equals("S")) {
+    saveFile(menu[1]); //allocates a new text file and saves array value to file
+   }
+   
+   if (menu[0].equals("x")||menu[0].equals("X")) {
+    noTerminate = false; //ends menu loop
+    System.out.println("Program terminated.");
+   }
+  }while(noTerminate);//end of menu loop
+ }
+
+    //writes values of arrays to a text file, given file name 
+ public static void saveFile(String fn) {
+  File file = new File(fn); //sets file name
+  PrintWriter pw=null;
+  try {
+   pw = new PrintWriter(file);
+   // write size to file
+   pw.println(screen.length); //prints # of rows of screen array
+   pw.println(screen[0].length); //prints # of columns of screen array
+
+   for(int row=0; screen.length>row; row++){
+    for(int col = 0; screen[row].length>col; col++){ //runs through all points in array
+     pw.print(screen[row][col]+" "); //prints out value of array on file.txt
+
+
+    }
+    pw.println(); //prints new line to separate rows
+   }
+
+
+  } catch (FileNotFoundException e) {
+   e.printStackTrace();
+  } finally {
+   if(pw != null){
+    pw.close();
+   }
+  } 
+ }
+
+
+    //reads values of array from pre-exisiting file, given file name 
+ public static void readFile(String fn) {
+  Scanner s = null;
+  try {
+   s = new Scanner(new BufferedReader(new FileReader(fn))); //finds file name
+   int num = Integer.parseInt(s.next());  //converts array integer values to string
+   int num2 = Integer.parseInt(s.next());  //converts array integer values to string
+   screen = new int [num][num2]; //creates correct # of rows and columns
+   for(int row=0; screen.length>row; row++){  
+    for(int col = 0; screen[row].length>col; col++){//runs through entire document
+     screen[row][col]=Integer.parseInt(s.next()); //converts array string values back to integer values
+
+    }
+
+   }
+
+
+  } catch( FileNotFoundException e){
+   System.out.println("File was not found!");
+  } finally {
+   if (s!=null){
+    s.close();
+   }
+  }
+
+ }
+
+    //using exsisting array values, replaces with the average value
+ public static void smooth() {
+  int avg; //declares average variable
+  int smoth[][] =new int[screen.length][screen[0].length]; //creates temp array, same size as main screen array 
+  for(int row=0; screen.length>row; row++){
+   for(int col = 0; screen[row].length>col; col++){ //runs through all values of screen array
+    if(row==0&&row==screen.length-1&&col==0&&col==screen[0].length-1){ //if array only has one value
+     avg = screen[row][col];
+    }
+    else if(row == screen.length-1 && col == screen[0].length-1) {//average of bottom right corner
+     avg = (screen[row-1][col]+ screen[row][col-1]+screen[row-1][col-1]+screen[row][col])/4; 
+    }
+    else if(row == 0 && col ==0){ //average of top left corner
+     avg = (screen[row][col+1]+ screen[row+1][col]+screen[row+1][col+1]+screen[row][col])/4;
+    }
+    else if(row==0 && col==screen[0].length-1) { //average of top right corner 
+     avg = (screen[row][col-1] + screen[row+1][col] + screen[row+1][col-1]+screen[row][col])/4;
+    }
+    else if (row == screen.length-1 && col ==0) { //average of bottom left corner
+     avg = (screen[row-1][col]+screen[row][col+1]+screen[row-1][col+1]+screen[row][col])/4; 
+    }
+
+    else if(row == 0) {
+     avg = (screen[row][col-1]+screen[row][col+1]+screen[row+1][col]+screen[row+1][col-1]+screen[row+1][col+1]+screen[row][col])/6;
+    }
+    else if (col == 0) {
+     avg = (screen[row+1][col]+screen[row-1][col]+screen[row][col+1]+screen[row+1][col+1]+screen[row-1][col+1]+screen[row][col])/6;
+
+    }
+    else if (row == screen.length-1) {
+     avg = (screen[row][col-1]+screen[row][col+1]+screen[row-1][col]+screen[row-1][col-1]+screen[row-1][col+1]+screen[row][col])/6;
+    }
+    else if (col == screen[0].length-1) {
+     avg = (screen[row-1][col]+screen[row+1][col]+screen[row][col-1]+screen[row-1][col-1]+screen[row+1][col-1]+screen[row][col])/6;
+    }
+
+    else{ avg = (screen[row][col-1]+screen[row][col+1]+screen[row-1][col]+screen[row+1][col]+screen[row-1][col-1]+screen[row-1][col+1]+screen[row+1][col-1]+screen[row+1][col+1]+screen[row][col])/9;
+    }
+    smoth[row][col]=avg;
+
+   }
+   avg = 0; 
+  }
+
+  for(int row=0; screen.length>row; row++){
+   for(int col = 0; screen[row].length>col; col++){
+    screen[row][col]=smoth[row][col];
+   }
+  }
+ }
+
+
+
+ public static void rect() {
+  int r1 = Integer.parseInt(menu[1]);
+  int r2 = Integer.parseInt(menu[3]);
+  int c1 = Integer.parseInt(menu[2]);
+  int c2 = Integer.parseInt(menu[4]);
+  int c = Integer.parseInt(menu[5]);
+  for(int v = r1; r2 >= v; v++){
+   for(int h = c1; c2>=h; h++){
+    screen[v][h]=c;
+   }
+
+  }
+
+
+ }
+
+
+ public static void display() {
+
+  for(int row=0; screen.length>row; row++){
+   for(int col = 0; screen[row].length>col; col++){
+    System.out.print(screen[row][col]+ "\t");
+   }
+   System.out.println();
+  }
+ }
+
+
+ public static void pixel() {
+
+  screen[Integer.parseInt(menu[1])][Integer.parseInt(menu[2])] = Integer.parseInt(menu[3]);
+ }
+
+
+ public static void clear() {
+  //change all values to 0 
+  for(int row=0; screen.length>row; row++){
+   for(int col = 0; screen[row].length>col; col++){
+    screen[row][col]=0;
+
+   }
+
+  }
+ }
+
+ public static void intialize() {
+  screen= new int[Integer.parseInt(menu[1])][Integer.parseInt(menu[2])]; 
+
+ }
+
+}
